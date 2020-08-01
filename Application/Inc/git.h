@@ -1,10 +1,11 @@
-#ifndef GIT_H 
-#define GIT_H 
- 
-#define GIT_COMMIT "302c58e24566bc32f7ab55fbd864e73e4a3d7d1c" 
-#define GIT_BRANCH "Development" 
-#define GIT_HASH "302c58e" 
- 
-#define BUILD_DATE "06.07.2020 " 
-#define BUILD_TIME "18:28" 
-#endif /* GIT_H */ 
+#ifndef _GIT_H_ /* Definiere Klasse _GIT_H_ */
+#define _GIT_H_ /* GIT_H */
+
+#define GIT_COMMIT "2907aa8"
+#define GIT_BRANCH "Development"
+#define GIT_HASH "2907aa814a9fceca4d744cd8497315d09a195e0d"
+#define GIT_TAG ""
+
+#define BUILD_DATE "2020-08-01"
+#define BUILD_TIME "23:12:26"
+#endif /* GIT_H */

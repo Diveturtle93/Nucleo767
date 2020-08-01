@@ -6,6 +6,7 @@
 
 #include "inttypes.h"
 #include "main.h"
+#include "usart.h"
 #include "BasicUart.h"
 
 void uartTransmit(const char *str, const size_t size)

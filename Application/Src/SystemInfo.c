@@ -32,23 +32,23 @@ void collectMiddlewareInfo()
 
 
 	uartTransmit(STRING_HAL_VERSION, sizeof(STRING_HAL_VERSION));
-	uartTransmitNumber((uint32_t)((HAL_GetHalVersion()>>24)&0xFF), 10);
+	uartTransmitNumber((uint32_t)((HAL_GetHalVersion() >> 24) & 0xFF), 10);
 
 	uartTransmit(".", 1);
-	uartTransmitNumber((uint32_t)((HAL_GetHalVersion()>>16)&0xFF), 10);
+	uartTransmitNumber((uint32_t)((HAL_GetHalVersion() >> 16) & 0xFF), 10);
 
 	uartTransmit(".", 1);
-	uartTransmitNumber((uint32_t)((HAL_GetHalVersion()>>8)&0xFF), 10);
+	uartTransmitNumber((uint32_t)((HAL_GetHalVersion() >> 8) & 0xFF), 10);
 
 	uartTransmit(".", 1);
-	uartTransmitNumber((uint32_t)(HAL_GetHalVersion()&0xFF), 10);
+	uartTransmitNumber((uint32_t)(HAL_GetHalVersion() & 0xFF), 10);
 
 
 	uartTransmit(STRING_RTOS_CMSIS_VERSION, sizeof(STRING_RTOS_CMSIS_VERSION));
-	uartTransmitNumber((osCMSIS>>16), 10);
+	uartTransmitNumber((osCMSIS >> 16), 10);
 
 	uartTransmit(".", 1);
-	uartTransmitNumber((osCMSIS&0xFFFF), 10);
+	uartTransmitNumber((osCMSIS & 0xFFFF), 10);
 
 
 	uartTransmit(STRING_RTOS_VERSION , sizeof(STRING_RTOS_VERSION));
