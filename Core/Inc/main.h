@@ -68,14 +68,6 @@ void Error_Handler(void);
 #define RMII_REF_CLK_GPIO_Port GPIOA
 #define RMII_MDIO_Pin GPIO_PIN_2
 #define RMII_MDIO_GPIO_Port GPIOA
-#define Drucksensor_Pin GPIO_PIN_3
-#define Drucksensor_GPIO_Port GPIOA
-#define Temperatursensor_Pin GPIO_PIN_4
-#define Temperatursensor_GPIO_Port GPIOA
-#define DruckschalterNO_Pin GPIO_PIN_5
-#define DruckschalterNO_GPIO_Port GPIOA
-#define DruchschalterNC_Pin GPIO_PIN_6
-#define DruchschalterNC_GPIO_Port GPIOA
 #define RMII_CRS_DV_Pin GPIO_PIN_7
 #define RMII_CRS_DV_GPIO_Port GPIOA
 #define RMII_RXD0_Pin GPIO_PIN_4
