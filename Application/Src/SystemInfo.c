@@ -179,34 +179,50 @@ reset_reason readResetSource(void)
 {
 	reset_reason reset_flags = STARTUP;
 
+	// Prüfe Reset Flag Internen Watchdog
 	if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST) == true)
 	{
 		reset_flags += IWDG1;
 	}
+
+	// Prüfe Reset Flag Window Watchdog
 	if (__HAL_RCC_GET_FLAG(RCC_FLAG_WWDGRST) == true)
 	{
 		reset_flags += WWDG1;
 	}
+
+	// Prüfe Reset Flag Low Power Reset
 	if (__HAL_RCC_GET_FLAG(RCC_FLAG_LPWRRST) == true)
 	{
 		reset_flags += CPURST1;
 	}
+
+	// Prüfe Reset Flag Brown Out Reset
 	if (__HAL_RCC_GET_FLAG(RCC_FLAG_BORRST) == true)
 	{
 		reset_flags += BORST1;
 	}
+
+	// Prüfe Reset Flag Power On Reset
 	if (__HAL_RCC_GET_FLAG(RCC_FLAG_PORRST) == true)
 	{
 		reset_flags += PORST1;
 	}
+
+	// Prüfe Reset Flag Software Reset
 	if (__HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST) == true)
 	{
 		reset_flags += SFTRST1;
 	}
+
+	// Prüfe Reset Flag Pin-Reset
 	if (__HAL_RCC_GET_FLAG(RCC_FLAG_PINRST) == true)
 	{
 		reset_flags += PINRST1;
 	}
+
+	// Lösche alle Reset Flags
+	__HAL_RCC_CLEAR_RESET_FLAGS();
 
 	return reset_flags;
 }
@@ -225,35 +241,41 @@ void printResetSource(reset_reason reset_flags)
 	{
 		if (reset_flags & IWDG1)
 		{
-			uartTransmit("IWDG Reset\r\n", 12);
+			uartTransmit("Interner Watchdog Reset\n", 24);
 		}
+
 		if (reset_flags & WWDG1)
 		{
-			uartTransmit("WWDG Reset\r\n", 12);
+			uartTransmit("Window Watchdog Reset\n", 22);
 		}
+
 		if (reset_flags & CPURST1)
 		{
-			uartTransmit("CPU Reset\r\n", 11);
+			uartTransmit("CPU Reset\n", 10);
 		}
 		if (reset_flags & BORST1)
 		{
-			uartTransmit("BOR Reset\r\n", 11);
+			uartTransmit("Brown Out Reset\n", 16);
 		}
+
 		if (reset_flags & PORST1)
 		{
-			uartTransmit("POR Reset\r\n", 11);          //Power on Reset / Power down Reser
+			uartTransmit("Power On Reset\n", 15);          //Power on Reset / Power down Reser
 		}
+
 		if (reset_flags & SFTRST1)
 		{
-			uartTransmit("Software Reset\r\n", 16);
+			uartTransmit("Software Reset\n", 15);
 		}
+
 		if (reset_flags & PINRST1)
 		{
-			uartTransmit("PIN Reset\r\n", 11);          //NRST pin
+			uartTransmit("PIN Reset\n", 10);          //NRST pin
 		}
+
 		if (reset_flags & RMVF1)
 		{
-			uartTransmit("RMVF\r\n", 6);                //NRST pin
+			uartTransmit("RMVF\n", 5);                //NRST pin
 		}
 	}
 }

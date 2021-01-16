@@ -21,10 +21,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "can.h"
-#include "eth.h"
-#include "spi.h"
 #include "usart.h"
-#include "usb_otg.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -73,7 +70,7 @@ void MX_FREERTOS_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	uint8_t status = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -94,14 +91,14 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_ETH_Init();
   MX_USART3_UART_Init();
-  MX_USB_OTG_FS_PCD_Init();
   MX_CAN1_Init();
   MX_CAN2_Init();
-  MX_SPI4_Init();
   MX_USART2_UART_Init();
+  MX_CAN3_Init();
   /* USER CODE BEGIN 2 */
+	printResetSource(readResetSource());
+
 	/*
 	* Testing UART, polling
 	*/
@@ -153,15 +150,44 @@ int main(void)
 	#define STRING_LED_FUNCTION	"All LEDs are functional.\n"
 	uartTransmit(STRING_LED_FUNCTION, sizeof(STRING_LED_FUNCTION));
 
+	if(HAL_CAN_Start(&hcan1) != HAL_OK)
+	{
+		/* Start Error */
+		Error_Handler(1);
+	}
+	uartTransmit("CAN START\n", 10);
+
+	if(HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY) != HAL_OK)
+	{
+		/* Notification Error */
+		Error_Handler(1);
+	}
+	uartTransmit("Send Message\n", 13);
 
 	CAN_TxHeaderTypeDef TxHeader;
 	TxHeader.StdId = 0x321;
 	TxHeader.ExtId = 0x01;
 	TxHeader.RTR = CAN_RTR_DATA;
 	TxHeader.IDE = CAN_ID_STD;
-	TxHeader.DLC = 2;
+	TxHeader.DLC = 8;
+	TxHeader.TransmitGlobalTime=DISABLE;
 	uint8_t txData[8] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08} ;
-	HAL_StatusTypeDef status = HAL_CAN_AddTxMessage(&hcan1, &TxHeader, txData, (uint32_t *)CAN_TX_MAILBOX0);
+
+	status = HAL_CAN_AddTxMessage(&hcan1, &TxHeader, txData, (uint32_t *)CAN_TX_MAILBOX0);
+
+	if (status == HAL_OK) {
+		uartTransmit("HAL_OK\n", 7);
+	}
+	else if (status == HAL_ERROR) {
+		uartTransmit("HAL_ERROR\n", 10);
+	}
+	else if (status == HAL_BUSY) {
+		uartTransmit("HAL_BUSY\n", 9);
+	}
+	else if (status == HAL_TIMEOUT) {
+		uartTransmit("HAL_TIMEOUT\n", 12);
+	}
+
 
   /* USER CODE END 2 */
 
@@ -169,7 +195,7 @@ int main(void)
   osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init();
   /* Start scheduler */
-  //osKernelStart();
+  osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
@@ -208,18 +234,18 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 192;
+  RCC_OscInitStruct.PLL.PLLN = 216;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 8;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
-    Error_Handler();
+    Error_Handler(2);
   }
   /** Activate the Over-Drive mode
   */
   if (HAL_PWREx_EnableOverDrive() != HAL_OK)
   {
-    Error_Handler();
+    Error_Handler(2);
   }
   /** Initializes the CPU, AHB and APB buses clocks
   */
@@ -230,27 +256,28 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_6) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7) != HAL_OK)
   {
-    Error_Handler();
+    Error_Handler(2);
   }
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_USART3
-                              |RCC_PERIPHCLK_CLK48;
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_USART3;
   PeriphClkInitStruct.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
   PeriphClkInitStruct.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
-  PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48SOURCE_PLL;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
-    Error_Handler();
+    Error_Handler(2);
   }
   HAL_RCC_MCOConfig(RCC_MCO2, RCC_MCO2SOURCE_SYSCLK, RCC_MCODIV_3);
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan3)
+{
+	uartTransmit("rx 0\n", 5);
+}
 /* USER CODE END 4 */
 
-/**
+ /**
   * @brief  Period elapsed callback in non blocking mode
   * @note   This function is called  when TIM14 interrupt took place, inside
   * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
@@ -275,11 +302,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   * @brief  This function is executed in case of error occurrence.
   * @retval None
   */
-void Error_Handler(void)
+void Error_Handler(uint8_t error)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-
+	uartTransmit("Error\n", 6);
   /* USER CODE END Error_Handler_Debug */
 }
 

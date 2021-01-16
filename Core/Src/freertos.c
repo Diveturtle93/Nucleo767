@@ -55,11 +55,18 @@ const osThreadAttr_t defaultTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 128 * 4
 };
-/* Definitions for Can1 */
-osThreadId_t Can1Handle;
-const osThreadAttr_t Can1_attributes = {
-  .name = "Can1",
+/* Definitions for Task */
+osThreadId_t TaskHandle;
+const osThreadAttr_t Task_attributes = {
+  .name = "Task",
   .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 128 * 4
+};
+/* Definitions for Can3Task */
+osThreadId_t Can3TaskHandle;
+const osThreadAttr_t Can3Task_attributes = {
+  .name = "Can3Task",
+  .priority = (osPriority_t) osPriorityHigh,
   .stack_size = 128 * 4
 };
 
@@ -70,6 +77,7 @@ const osThreadAttr_t Can1_attributes = {
 
 void StartDefaultTask(void *argument);
 void StartTask(void *argument);
+void StartCan3Task(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -103,12 +111,19 @@ void MX_FREERTOS_Init(void) {
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-  /* creation of Can1 */
-  Can1Handle = osThreadNew(StartTask, NULL, &Can1_attributes);
+  /* creation of Task */
+  TaskHandle = osThreadNew(StartTask, NULL, &Task_attributes);
+
+  /* creation of Can3Task */
+  Can3TaskHandle = osThreadNew(StartCan3Task, NULL, &Can3Task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+  /* add events, ... */
+  /* USER CODE END RTOS_EVENTS */
 
 }
 
@@ -125,7 +140,10 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
+	osDelay(500);
+	HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+	osDelay(500);
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -143,9 +161,30 @@ void StartTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+	osDelay(1000);
+	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+    osDelay(1000);
   }
   /* USER CODE END StartTask */
+}
+
+/* USER CODE BEGIN Header_StartCan3Task */
+/**
+* @brief Function implementing the Can3Task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartCan3Task */
+void StartCan3Task(void *argument)
+{
+  /* USER CODE BEGIN StartCan3Task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartCan3Task */
 }
 
 /* Private application code --------------------------------------------------*/

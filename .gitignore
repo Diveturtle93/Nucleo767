@@ -2,3 +2,4 @@ Debug/*
 /Debug/
 .settings/*
 /.settings/
+/Application/Inc/git.h
