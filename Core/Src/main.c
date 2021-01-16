@@ -28,6 +28,7 @@
 /* USER CODE BEGIN Includes */
 #include "BasicUart.h"
 #include "SystemInfo.h"
+#include "Error.h"
 
 /* USER CODE END Includes */
 
@@ -70,7 +71,7 @@ void MX_FREERTOS_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	uint8_t status = 0;
+	uint8_t HAL_STATUS = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -102,7 +103,7 @@ int main(void)
 	/*
 	* Testing UART, polling
 	*/
-	#define TEST_STRING_UART  "\nUART3 Transmitting in polling mode, Hello Frederik!\n"
+	#define TEST_STRING_UART  "\nUART3 Transmitting in polling mode, Hello Diveturtle93!\n"
 	uartTransmit(TEST_STRING_UART, sizeof(TEST_STRING_UART));
 
 	collectSystemInfo();
@@ -110,7 +111,7 @@ int main(void)
 	/*
 	* Testing LEDs
 	*
-	* Toggles each of the 4 available LEDs seperatly for a second.
+	* Toggles each of the 3 available LEDs seperatly for a second.
 	*/
 	#define TEST_STRING_LEDS  "\nTesting LEDs\n"
 	uartTransmit(TEST_STRING_LEDS, sizeof(TEST_STRING_LEDS));
@@ -137,30 +138,24 @@ int main(void)
 	HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
 
 	HAL_Delay(1000);
-	uartTransmit(".", 1);
-
-	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
-	HAL_Delay(1000);
-	uartTransmit(".", 1);
-	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-
-	HAL_Delay(1000);
 	uartTransmit(".\n", 2);
 
 	#define STRING_LED_FUNCTION	"All LEDs are functional.\n"
 	uartTransmit(STRING_LED_FUNCTION, sizeof(STRING_LED_FUNCTION));
 
-	if(HAL_CAN_Start(&hcan1) != HAL_OK)
+	if((HAL_STATUS = HAL_CAN_Start(&hcan1)) != HAL_OK)
 	{
 		/* Start Error */
-		Error_Handler(1);
+		hal_error(HAL_STATUS);
+		Error_Handler();
 	}
 	uartTransmit("CAN START\n", 10);
 
-	if(HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY) != HAL_OK)
+	if((HAL_STATUS = HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY)) != HAL_OK)
 	{
 		/* Notification Error */
-		Error_Handler(1);
+		hal_error(HAL_STATUS);
+		Error_Handler();
 	}
 	uartTransmit("Send Message\n", 13);
 
@@ -173,21 +168,9 @@ int main(void)
 	TxHeader.TransmitGlobalTime=DISABLE;
 	uint8_t txData[8] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08} ;
 
-	status = HAL_CAN_AddTxMessage(&hcan1, &TxHeader, txData, (uint32_t *)CAN_TX_MAILBOX0);
+	HAL_STATUS = HAL_CAN_AddTxMessage(&hcan1, &TxHeader, txData, (uint32_t *)CAN_TX_MAILBOX0);
 
-	if (status == HAL_OK) {
-		uartTransmit("HAL_OK\n", 7);
-	}
-	else if (status == HAL_ERROR) {
-		uartTransmit("HAL_ERROR\n", 10);
-	}
-	else if (status == HAL_BUSY) {
-		uartTransmit("HAL_BUSY\n", 9);
-	}
-	else if (status == HAL_TIMEOUT) {
-		uartTransmit("HAL_TIMEOUT\n", 12);
-	}
-
+	hal_error(HAL_STATUS);
 
   /* USER CODE END 2 */
 
@@ -239,13 +222,13 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLQ = 8;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
-    Error_Handler(2);
+    Error_Handler();
   }
   /** Activate the Over-Drive mode
   */
   if (HAL_PWREx_EnableOverDrive() != HAL_OK)
   {
-    Error_Handler(2);
+    Error_Handler();
   }
   /** Initializes the CPU, AHB and APB buses clocks
   */
@@ -258,14 +241,14 @@ void SystemClock_Config(void)
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7) != HAL_OK)
   {
-    Error_Handler(2);
+    Error_Handler();
   }
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_USART3;
   PeriphClkInitStruct.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
   PeriphClkInitStruct.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
-    Error_Handler(2);
+    Error_Handler();
   }
   HAL_RCC_MCOConfig(RCC_MCO2, RCC_MCO2SOURCE_SYSCLK, RCC_MCODIV_3);
 }
@@ -302,7 +285,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   * @brief  This function is executed in case of error occurrence.
   * @retval None
   */
-void Error_Handler(uint8_t error)
+void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */

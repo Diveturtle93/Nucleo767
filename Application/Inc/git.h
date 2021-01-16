@@ -6,6 +6,6 @@
 #define GIT_HASH "04542fc5c539f44cb296d133d7185afbf80cfeda"
 #define GIT_TAG ""
 
-#define BUILD_DATE "2020-09-27"
-#define BUILD_TIME "11:41:14"
+#define BUILD_DATE __DATE__
+#define BUILD_TIME __TIME__
 #endif /* GIT_H */
