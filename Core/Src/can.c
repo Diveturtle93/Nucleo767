@@ -49,6 +49,25 @@ void MX_CAN1_Init(void)
     Error_Handler();
   }
 
+  CAN_FilterTypeDef  sFilterConfig;
+  /*##-2- Configure the CAN Filter ###########################################*/
+    sFilterConfig.FilterBank = 0;
+    sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+    sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+    sFilterConfig.FilterIdHigh = 0x0000;
+    sFilterConfig.FilterIdLow = 0x0000;
+    sFilterConfig.FilterMaskIdHigh = 0x0000;
+    sFilterConfig.FilterMaskIdLow = 0x0000;
+    sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+    sFilterConfig.FilterActivation = ENABLE;
+    sFilterConfig.SlaveStartFilterBank = 14;
+
+    if(HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig) != HAL_OK)
+    {
+      /* Filter configuration Error */
+      Error_Handler();
+    }
+
 }
 /* CAN2 init function */
 void MX_CAN2_Init(void)
@@ -56,7 +75,7 @@ void MX_CAN2_Init(void)
 
   hcan2.Instance = CAN2;
   hcan2.Init.Prescaler = 24;
-  hcan2.Init.Mode = CAN_MODE_NORMAL;
+  hcan2.Init.Mode = CAN_MODE_LOOPBACK;
   hcan2.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan2.Init.TimeSeg1 = CAN_BS1_15TQ;
   hcan2.Init.TimeSeg2 = CAN_BS2_2TQ;
@@ -78,7 +97,7 @@ void MX_CAN3_Init(void)
 
   hcan3.Instance = CAN3;
   hcan3.Init.Prescaler = 6;
-  hcan3.Init.Mode = CAN_MODE_NORMAL;
+  hcan3.Init.Mode = CAN_MODE_LOOPBACK;
   hcan3.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan3.Init.TimeSeg1 = CAN_BS1_15TQ;
   hcan3.Init.TimeSeg2 = CAN_BS2_2TQ;
@@ -126,6 +145,9 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     GPIO_InitStruct.Alternate = GPIO_AF9_CAN1;
     HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
+    /* CAN1 interrupt Init */
+    HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
   /* USER CODE BEGIN CAN1_MspInit 1 */
 
   /* USER CODE END CAN1_MspInit 1 */
@@ -227,6 +249,8 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
     */
     HAL_GPIO_DeInit(GPIOD, GPIO_PIN_0|GPIO_PIN_1);
 
+    /* CAN1 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(CAN1_RX0_IRQn);
   /* USER CODE BEGIN CAN1_MspDeInit 1 */
 
   /* USER CODE END CAN1_MspDeInit 1 */

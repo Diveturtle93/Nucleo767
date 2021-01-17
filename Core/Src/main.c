@@ -49,7 +49,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+CAN_RxHeaderTypeDef rxHeader;
+uint8_t rxData[8];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -145,7 +146,6 @@ int main(void)
 
 	if((HAL_STATUS = HAL_CAN_Start(&hcan1)) != HAL_OK)
 	{
-		/* Start Error */
 		hal_error(HAL_STATUS);
 		Error_Handler();
 	}
@@ -158,20 +158,6 @@ int main(void)
 		Error_Handler();
 	}
 	uartTransmit("Send Message\n", 13);
-
-	CAN_TxHeaderTypeDef TxHeader;
-	TxHeader.StdId = 0x321;
-	TxHeader.ExtId = 0x01;
-	TxHeader.RTR = CAN_RTR_DATA;
-	TxHeader.IDE = CAN_ID_STD;
-	TxHeader.DLC = 8;
-	TxHeader.TransmitGlobalTime=DISABLE;
-	uint8_t txData[8] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08} ;
-
-	HAL_STATUS = HAL_CAN_AddTxMessage(&hcan1, &TxHeader, txData, (uint32_t *)CAN_TX_MAILBOX0);
-
-	hal_error(HAL_STATUS);
-
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -254,8 +240,9 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan3)
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
+	HAL_CAN_GetRxMessage(hcan, (uint32_t)CAN_RX_FIFO0 , &rxHeader, rxData);
 	uartTransmit("rx 0\n", 5);
 }
 /* USER CODE END 4 */

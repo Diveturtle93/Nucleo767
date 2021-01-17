@@ -23,10 +23,11 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
+#include "can.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "Error.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -179,10 +180,22 @@ void StartTask(void *argument)
 void StartCan3Task(void *argument)
 {
   /* USER CODE BEGIN StartCan3Task */
+	CAN_TxHeaderTypeDef TxHeader;
+
+	TxHeader.StdId = 0x321;
+	TxHeader.ExtId = 0x01;
+	TxHeader.RTR = CAN_RTR_DATA;
+	TxHeader.IDE = CAN_ID_STD;
+	TxHeader.DLC = 8;
+	TxHeader.TransmitGlobalTime=DISABLE;
+	uint8_t txData[8] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	HAL_CAN_AddTxMessage(&hcan1, &TxHeader, txData, (uint32_t *)CAN_TX_MAILBOX0);
+
+	osDelay(5000);
   }
   /* USER CODE END StartCan3Task */
 }

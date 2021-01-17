@@ -8,6 +8,11 @@
 // Projekt	:	STM32F767ZI
 //----------------------------------------------------------------------
 
+// Einfügen der STM Include-Dateien
+//----------------------------------------------------------------------
+#include "main.h"
+//----------------------------------------------------------------------
+
 // Einfügen der eigenen Include Dateien
 //----------------------------------------------------------------------
 #include "Error.h"
@@ -18,18 +23,19 @@
 //----------------------------------------------------------------------
 void hal_error(uint8_t status)
 {
-	if (status == HAL_OK) {
+#ifdef DEBUG
+	if (status == HAL_OK) {												// HAL OK
 		uartTransmit("HAL OK\n", 7);
 	}
-	else if (status == HAL_ERROR) {
+	else if (status == HAL_ERROR) {										// HAL Error
 		uartTransmit("HAL ERROR\n", 10);
 	}
-	else if (status == HAL_BUSY) {
+	else if (status == HAL_BUSY) {										// HAL Beschäftigt
 		uartTransmit("HAL BUSY\n", 9);
 	}
-	else if (status == HAL_TIMEOUT) {
+	else if (status == HAL_TIMEOUT) {									// HAL Timeout
 		uartTransmit("HAL TIMEOUT\n", 12);
 	}
-
+#endif
 }
 //----------------------------------------------------------------------
