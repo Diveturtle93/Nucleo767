@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "adc.h"
 #include "can.h"
 #include "usart.h"
 #include "gpio.h"
@@ -39,6 +40,10 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define TEMP_SENSOR_AVG_SLOPE_MV_PER_CELSIUS                        2.5f
+#define TEMP_SENSOR_VOLTAGE_MV_AT_25                                760.0f
+#define ADC_REFERENCE_VOLTAGE_MV                                    3300.0f
+#define ADC_MAX_OUTPUT_VALUE                                        4095.0f
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -51,6 +56,8 @@
 /* USER CODE BEGIN PV */
 CAN_RxHeaderTypeDef rxHeader;
 uint8_t rxData[8];
+int32_t temperature;
+float sensorValue;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -93,11 +100,12 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   MX_CAN1_Init();
   MX_CAN2_Init();
-  MX_USART2_UART_Init();
   MX_CAN3_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 	printResetSource(readResetSource());
 
@@ -144,12 +152,12 @@ int main(void)
 	#define STRING_LED_FUNCTION	"All LEDs are functional.\n"
 	uartTransmit(STRING_LED_FUNCTION, sizeof(STRING_LED_FUNCTION));
 
+	uartTransmit("CAN START\n", 10);
 	if((HAL_STATUS = HAL_CAN_Start(&hcan1)) != HAL_OK)
 	{
 		hal_error(HAL_STATUS);
 		Error_Handler();
 	}
-	uartTransmit("CAN START\n", 10);
 
 	if((HAL_STATUS = HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY)) != HAL_OK)
 	{
@@ -157,6 +165,24 @@ int main(void)
 		hal_error(HAL_STATUS);
 		Error_Handler();
 	}
+
+	uartTransmit("Temperatur messen\n", 18);
+	HAL_ADC_Start(&hadc1);
+	if(HAL_ADC_PollForConversion(&hadc1, 100) == HAL_OK)
+	{
+	    sensorValue = (float)HAL_ADC_GetValue(&hadc1);
+	    HAL_ADC_Stop(&hadc1);
+
+	    sensorValue = sensorValue * ADC_REFERENCE_VOLTAGE_MV / ADC_MAX_OUTPUT_VALUE;
+	    temperature = (int32_t)((sensorValue - TEMP_SENSOR_VOLTAGE_MV_AT_25) / TEMP_SENSOR_AVG_SLOPE_MV_PER_CELSIUS + 25);
+	}
+	else
+	{
+	    temperature = -273;
+	}
+	uartTransmitNumber(temperature, 10);
+	uartTransmit("\n", 1);
+
 	uartTransmit("Send Message\n", 13);
   /* USER CODE END 2 */
 

@@ -23,11 +23,11 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
-#include "can.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "Error.h"
+#include "can.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

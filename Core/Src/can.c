@@ -34,7 +34,7 @@ void MX_CAN1_Init(void)
 
   hcan1.Instance = CAN1;
   hcan1.Init.Prescaler = 12;
-  hcan1.Init.Mode = CAN_MODE_NORMAL;
+  hcan1.Init.Mode = CAN_MODE_SILENT_LOOPBACK;
   hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan1.Init.TimeSeg1 = CAN_BS1_15TQ;
   hcan1.Init.TimeSeg2 = CAN_BS2_2TQ;
@@ -75,7 +75,7 @@ void MX_CAN2_Init(void)
 
   hcan2.Instance = CAN2;
   hcan2.Init.Prescaler = 24;
-  hcan2.Init.Mode = CAN_MODE_LOOPBACK;
+  hcan2.Init.Mode = CAN_MODE_SILENT_LOOPBACK;
   hcan2.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan2.Init.TimeSeg1 = CAN_BS1_15TQ;
   hcan2.Init.TimeSeg2 = CAN_BS2_2TQ;
@@ -97,7 +97,7 @@ void MX_CAN3_Init(void)
 
   hcan3.Instance = CAN3;
   hcan3.Init.Prescaler = 6;
-  hcan3.Init.Mode = CAN_MODE_LOOPBACK;
+  hcan3.Init.Mode = CAN_MODE_SILENT_LOOPBACK;
   hcan3.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan3.Init.TimeSeg1 = CAN_BS1_15TQ;
   hcan3.Init.TimeSeg2 = CAN_BS2_2TQ;
