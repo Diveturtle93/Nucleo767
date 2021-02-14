@@ -22,6 +22,7 @@
 #include "cmsis_os.h"
 #include "adc.h"
 #include "can.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -44,6 +45,10 @@
 #define TEMP_SENSOR_VOLTAGE_MV_AT_25                                760.0f
 #define ADC_REFERENCE_VOLTAGE_MV                                    3300.0f
 #define ADC_MAX_OUTPUT_VALUE                                        4095.0f
+#define TEMP110_CAL_VALUE                                           ((uint16_t*)((uint32_t)0x1FF0F44E))
+#define TEMP30_CAL_VALUE                                            ((uint16_t*)((uint32_t)0x1FF0F44C))
+#define TEMP110                                                     110.0f
+#define TEMP30                                                      30.0f
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -58,6 +63,8 @@ CAN_RxHeaderTypeDef rxHeader;
 uint8_t rxData[8];
 int32_t temperature;
 float sensorValue;
+//float adcCalValue30 = (float)(*TEMP30_CAL_VALUE);
+//float adcCalValue110 = (float)(*TEMP110_CAL_VALUE);
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -100,12 +107,14 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   MX_CAN1_Init();
   MX_CAN2_Init();
+  MX_USART2_UART_Init();
   MX_CAN3_Init();
   MX_ADC1_Init();
+  MX_TIM13_Init();
+
   /* USER CODE BEGIN 2 */
 	printResetSource(readResetSource());
 
@@ -149,6 +158,8 @@ int main(void)
 	HAL_Delay(1000);
 	uartTransmit(".\n", 2);
 
+	HAL_TIM_Base_Start_IT(&htim13);
+
 	#define STRING_LED_FUNCTION	"All LEDs are functional.\n"
 	uartTransmit(STRING_LED_FUNCTION, sizeof(STRING_LED_FUNCTION));
 
@@ -167,14 +178,16 @@ int main(void)
 	}
 
 	uartTransmit("Temperatur messen\n", 18);
+	uartTransmitNumber(*TEMP30_CAL_VALUE, 10);
+	uartTransmit("\n", 1);
+	uartTransmitNumber(*TEMP110_CAL_VALUE, 10);
+	uartTransmit("\n", 1);
 	HAL_ADC_Start(&hadc1);
 	if(HAL_ADC_PollForConversion(&hadc1, 100) == HAL_OK)
 	{
 	    sensorValue = (float)HAL_ADC_GetValue(&hadc1);
 	    HAL_ADC_Stop(&hadc1);
-
-	    sensorValue = sensorValue * ADC_REFERENCE_VOLTAGE_MV / ADC_MAX_OUTPUT_VALUE;
-	    temperature = (int32_t)((sensorValue - TEMP_SENSOR_VOLTAGE_MV_AT_25) / TEMP_SENSOR_AVG_SLOPE_MV_PER_CELSIUS + 25);
+	    temperature = (int32_t)((TEMP110 - TEMP30) / ((float)(*TEMP110_CAL_VALUE) - (float)(*TEMP30_CAL_VALUE)) * (sensorValue - (float)(*TEMP30_CAL_VALUE)) + TEMP30);
 	}
 	else
 	{
@@ -290,7 +303,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-
+  if (htim->Instance == TIM13) {
+  	  HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
+    }
   /* USER CODE END Callback 1 */
 }
 

@@ -112,13 +112,14 @@ void collectSoftwareInfo()
 //----------------------------------------------------------------------
 void collectHardwareInfo()
 {
-	#define STRING_STM_DEVICE_ID        "\nSTM32 Device ID:\t"
-	#define STRING_STM_REVISION         "\nSTM32 Revision ID:\t"
-	#define STRING_STM_FREQ             "\nSTM32 CPU-Freq:\t\t"
-	#define STRING_STM_UUID             "\nSTM32 UUID:\t\t"
+	#define STRING_STM_DEVICE_ID		"\nSTM32 Device ID:\t"
+	#define STRING_STM_REVISION			"\nSTM32 Revision ID:\t"
+	#define STRING_STM_FREQ				"\nSTM32 CPU-Freq:\t\t"
+	#define STRING_STM_UUID				"\nSTM32 UUID:\t\t"
+	#define STRING_FLASH_SIZE			"\nSTM32 Flash Size:\t"
 
 	uartTransmit(STRING_STM_DEVICE_ID, sizeof(STRING_STM_DEVICE_ID));
-	uartTransmitNumber(HAL_GetDEVID(), 10);								// Mikrocontroller Typ
+	uartTransmitNumber(HAL_GetDEVID(), 16);								// Mikrocontroller Typ
 
 	uartTransmit(STRING_STM_REVISION, sizeof(STRING_STM_REVISION));
 	
@@ -158,6 +159,9 @@ void collectHardwareInfo()
 
 	uartTransmit(" ", 1);
 	uartTransmitNumber(HAL_GetUIDw2(), 16);								// UID2 ausgeben
+
+	uartTransmit(STRING_FLASH_SIZE, sizeof(STRING_FLASH_SIZE));
+	//uartTransmitNumber(*FLASHSIZE_BASE, 16);							// Mikrocontroller Flash Size
 
 	uartTransmit("\n", 1);
 }
