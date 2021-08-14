@@ -1,5 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
+# Toolchain: GNU Tools for STM32 (9-2020-q2-update)
 ################################################################################
 
 -include ../makefile.init
@@ -48,6 +49,17 @@ endif
 	@echo "#define BUILD_TIME \"$(shell date +"%H:%M:%S")\"" >> $@
 	@echo "#endif /* GIT_H */" >> $@
 
+OPTIONAL_TOOL_DEPS := \
+$(wildcard ../makefile.defs) \
+$(wildcard ../makefile.init) \
+$(wildcard ../makefile.targets) \
+
+
+BUILD_ARTIFACT_NAME := STM32F767ZI
+BUILD_ARTIFACT_EXTENSION := elf
+BUILD_ARTIFACT_PREFIX := 
+BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME).$(BUILD_ARTIFACT_EXTENSION)
+
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
 STM32F767ZI.elf \
@@ -63,25 +75,28 @@ STM32F767ZI.bin \
 
 
 # All Target
-all: ../Application/Inc/git.h STM32F767ZI.elf secondary-outputs
+all: main-build
+
+# Main-build Target
+main-build: STM32F767ZI.elf secondary-outputs
 
 # Tool invocations
-STM32F767ZI.elf: $(OBJS) $(USER_OBJS) C:\Users\Frederik\Documents\Git\STM32F767ZIT\STM32F767ZITX_FLASH.ld
+STM32F767ZI.elf: $(OBJS) $(USER_OBJS) C:\Users\Frederik\Documents\Git\STM32F767ZIT\STM32F767ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	arm-none-eabi-gcc -o "STM32F767ZI.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\Frederik\Documents\Git\STM32F767ZIT\STM32F767ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32F767ZI.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
-default.size.stdout: $(EXECUTABLES)
+default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	arm-none-eabi-size  $(EXECUTABLES)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-STM32F767ZI.list: $(EXECUTABLES)
+STM32F767ZI.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "STM32F767ZI.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-STM32F767ZI.bin: $(EXECUTABLES)
+STM32F767ZI.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "STM32F767ZI.bin"
 	@echo 'Finished building: $@'
 	@echo ' '
@@ -93,7 +108,14 @@ clean:
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
 
-.PHONY: all clean dependents
+fail-specified-linker-script-missing:
+	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'
+	@exit 2
+
+warn-no-linker-script-specified:
+	@echo 'Warning: No linker script specified. Check the linker settings in the build configuration.'
+
+.PHONY: all clean dependents fail-specified-linker-script-missing warn-no-linker-script-specified
 .SECONDARY:
 
 -include ../makefile.targets

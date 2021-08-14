@@ -53,22 +53,22 @@
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
+  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 128 * 4
 };
 /* Definitions for Task */
 osThreadId_t TaskHandle;
 const osThreadAttr_t Task_attributes = {
   .name = "Task",
+  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 128 * 4
 };
 /* Definitions for Can3Task */
 osThreadId_t Can3TaskHandle;
 const osThreadAttr_t Can3Task_attributes = {
   .name = "Can3Task",
+  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityHigh,
-  .stack_size = 128 * 4
 };
 
 /* Private function prototypes -----------------------------------------------*/
