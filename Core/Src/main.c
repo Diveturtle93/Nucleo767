@@ -36,7 +36,18 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+// Debug Nachricht ueber SWO senden
+// Nachricht SWO ITM Data Console
+// http://stefanfrings.de/stm32/cube_ide.html
+// Core Clock := Maximalfrequenz
+void ITM_SendString(char *ptr)
+{
+	while(*ptr)
+	{
+		ITM_SendChar(*ptr);
+		ptr++;
+	}
+}
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -122,6 +133,7 @@ int main(void)
 	*/
 	#define TEST_STRING_UART  "\nUART3 Transmitting in polling mode, Hello Diveturtle93!\n"
 	uartTransmit(TEST_STRING_UART, sizeof(TEST_STRING_UART));
+	ITM_SendString(TEST_STRING_UART);
 
 	collectSystemInfo();
 
