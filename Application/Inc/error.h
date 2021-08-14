@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-// Titel	:	BasicUart.h
+// Titel	:	Error.h
 //----------------------------------------------------------------------
 // Sprache	:	C
 // Datum	:	16.01.2021
@@ -10,22 +10,19 @@
 
 // Dateiheader definieren
 //----------------------------------------------------------------------
-#ifndef INC_BASICUART_H_
-#define INC_BASICUART_H_
+#ifndef ERROR_H_
+#define ERROR_H_
 //----------------------------------------------------------------------
 
-// Einfügen der standard Include-Dateien
+// Festlegen von Einstellungen
 //----------------------------------------------------------------------
-#include <stdint.h>
-#include <stdio.h>
+#define SYS_Clock				1										// Error an der Systemclock
 //----------------------------------------------------------------------
 
 // Funktionen definieren
 //----------------------------------------------------------------------
-void uartTransmit(const char *str, const size_t size);
-void uartTransmitNumber(const uint32_t number, const uint32_t base);
-void uartReInitBasicPolling(void);
+void hal_error(uint8_t status);
 //----------------------------------------------------------------------
 
-#endif /* INC_BASICUART_H_ */
+#endif /* INC_ERROR_H_ */
 //----------------------------------------------------------------------

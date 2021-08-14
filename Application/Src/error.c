@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-// Titel	:	BasicUart.h
+// Titel	:	Error.c
 //----------------------------------------------------------------------
 // Sprache	:	C
 // Datum	:	16.01.2021
@@ -8,24 +8,34 @@
 // Projekt	:	STM32F767ZI
 //----------------------------------------------------------------------
 
-// Dateiheader definieren
+// Einfügen der STM Include-Dateien
 //----------------------------------------------------------------------
-#ifndef INC_BASICUART_H_
-#define INC_BASICUART_H_
-//----------------------------------------------------------------------
-
-// Einfügen der standard Include-Dateien
-//----------------------------------------------------------------------
-#include <stdint.h>
-#include <stdio.h>
+#include "main.h"
 //----------------------------------------------------------------------
 
-// Funktionen definieren
+// Einfügen der eigenen Include Dateien
 //----------------------------------------------------------------------
-void uartTransmit(const char *str, const size_t size);
-void uartTransmitNumber(const uint32_t number, const uint32_t base);
-void uartReInitBasicPolling(void);
+#include "Error.h"
+#include "BasicUart.h"
 //----------------------------------------------------------------------
 
-#endif /* INC_BASICUART_H_ */
+// Hal Error auswerten und ausgeben
+//----------------------------------------------------------------------
+void hal_error(uint8_t status)
+{
+#ifdef DEBUG
+	if (status == HAL_OK) {												// HAL OK
+		uartTransmit("HAL OK\n", 7);
+	}
+	else if (status == HAL_ERROR) {										// HAL Error
+		uartTransmit("HAL ERROR\n", 10);
+	}
+	else if (status == HAL_BUSY) {										// HAL Beschäftigt
+		uartTransmit("HAL BUSY\n", 9);
+	}
+	else if (status == HAL_TIMEOUT) {									// HAL Timeout
+		uartTransmit("HAL TIMEOUT\n", 12);
+	}
+#endif
+}
 //----------------------------------------------------------------------
