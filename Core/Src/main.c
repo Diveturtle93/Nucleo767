@@ -28,9 +28,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <math.h>
 #include "BasicUart.h"
 #include "SystemInfo.h"
 #include "Error.h"
+#include "..\..\Application\Src\my_math.c"
 
 /* USER CODE END Includes */
 
@@ -40,6 +42,7 @@
 // Nachricht SWO ITM Data Console
 // http://stefanfrings.de/stm32/cube_ide.html
 // Core Clock := Maximalfrequenz
+// Im String #GRN# oder #RED# oder #ORG# erscheint die Nachricht in einer Farbe
 void ITM_SendString(char *ptr)
 {
 	while(*ptr)
@@ -70,6 +73,8 @@ void ITM_SendString(char *ptr)
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+static volatile uint16_t rising = 0;
+static volatile uint16_t falling = 0;
 CAN_RxHeaderTypeDef rxHeader;
 uint8_t rxData[8];
 int32_t temperature;
@@ -97,6 +102,7 @@ void MX_FREERTOS_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+	uint16_t dutyCycle, timerPeriod, frequency;
 	uint8_t HAL_STATUS = 0;
   /* USER CODE END 1 */
 
@@ -125,8 +131,15 @@ int main(void)
   MX_CAN3_Init();
   MX_ADC1_Init();
   MX_TIM13_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 	printResetSource(readResetSource());
+
+	timerPeriod = (HAL_RCC_GetPCLK2Freq() / htim1.Init.Prescaler);
+
+	if (HAL_TIM_Base_Start_IT(&htim1) != HAL_OK);
+	if (HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1) != HAL_OK);
+	if (HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_2) != HAL_OK);
 
 	/*
 	* Testing UART, polling
@@ -221,6 +234,17 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  if (rising != 0 && falling != 0) {
+		  int diff = getDifference(rising, falling);
+		  dutyCycle = round((float)(diff * 100) / (float)rising);               // (width / period ) * 100
+		  frequency = timerPeriod / rising;               // timer restarts after rising edge so time between two rising edge is whatever is measured
+	  } else {
+		  dutyCycle = 0;
+		  frequency = 0;
+	  }
+
+	  uartTransmitNumber(dutyCycle, 10);
+	  uartTransmitNumber(frequency, 10);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -238,9 +262,6 @@ void SystemClock_Config(void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
-  /** Configure LSE Drive Capability
-  */
-  HAL_PWR_EnableBkUpAccess();
   /** Configure the main internal regulator output voltage
   */
   __HAL_RCC_PWR_CLK_ENABLE();
@@ -315,9 +336,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-  if (htim->Instance == TIM13) {
-  	  HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
-    }
+	if (htim->Instance == TIM13) {
+		HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
+	}
+	if (htim == &htim1) {
+		if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) {
+			rising = calculateMovingAverage(rising, HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_1), 64);
+		} else if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2) {
+			falling = calculateMovingAverage(falling, HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_2), 64);
+		}
+	}
   /* USER CODE END Callback 1 */
 }
 

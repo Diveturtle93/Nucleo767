@@ -106,6 +106,10 @@ clean:
 	-$(RM) *
 	-@echo ' '
 
+pre-build:
+	$(MAKE) -f git.mk
+	-@echo ' '
+
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
 
 fail-specified-linker-script-missing:
