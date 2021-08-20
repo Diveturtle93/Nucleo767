@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-// Titel	:	Systeminformationen.h
+// Titel	:	Git.h
 //----------------------------------------------------------------------
 // Sprache	:	C
 // Datum	:	18.08.2021
@@ -16,31 +16,31 @@
 
 // Git Commit-Infos definieren
 //----------------------------------------------------------------------
-#define GIT_COMMIT					"1634b81"
+#define GIT_COMMIT					"093569c"
 #define GIT_BRANCH					"Development"
-#define GIT_HASH					"1634b81ff4bd39f3ed9c35da0535c0fb952293d1"
+#define GIT_HASH					"093569cce6acf69a7c4a3e510894eb525c1bc336"
 //----------------------------------------------------------------------
 
 // Git Tags-Infos definieren
 //----------------------------------------------------------------------
 #define GIT_LAST_TAG				"Init"
 #define GIT_TAG_COMMIT				"944ae72"
-#define GIT_TAG_DIRTY				"Init-15-g1634b81"
-#define GIT_TAG_DIRTY_NUMBER		"15"
+#define GIT_TAG_DIRTY				"Init-16-g093569c"
 //----------------------------------------------------------------------
 
 // Git Zaehler definieren
 //----------------------------------------------------------------------
-#define GIT_OVERALL_COMMIT_COUNT	"16"
-#define GIT_BRANCH_COMMIT_COUNT		"16"
-#define GIT_BRANCHES_COUNT			"2"
+#define GIT_TAG_DIRTY_COUNT			"16"
+#define GIT_OVERALL_COMMIT_COUNT	"17"
+#define GIT_BRANCH_COMMIT_COUNT		"17"
+#define GIT_ACTIVE_BRANCHES			"2"
 #define GIT_TAG_COUNT				"1"
 //----------------------------------------------------------------------
 
 // Build Zeit definieren
 //----------------------------------------------------------------------
-#define BUILD_DATE					"2021-08-18"
-#define BUILD_TIME					"21:08:51"
+#define BUILD_DATE					"2021-08-20"
+#define BUILD_TIME					"08:08:55"
 //----------------------------------------------------------------------
-#endif /* GIT_H */
+#endif /* _GIT_H_ */
 //----------------------------------------------------------------------

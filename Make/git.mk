@@ -2,7 +2,7 @@
 .PHONY: force
 ../Application/Inc/git.h: force
 	@echo "//----------------------------------------------------------------------" > $@
-	@echo "// Titel	:	Systeminformationen.h" >> $@
+	@echo "// Titel	:	Git.h" >> $@
 	@echo "//----------------------------------------------------------------------" >> $@
 	@echo "// Sprache	:	C" >> $@
 	@echo "// Datum	:	18.08.2021" >> $@
@@ -29,14 +29,14 @@
 	@echo "#define GIT_LAST_TAG				\"$(shell git tag)\"" >> $@
 	@echo "#define GIT_TAG_COMMIT				\"$(shell git rev-list --tags --abbrev-commit)\"" >> $@
 	@echo "#define GIT_TAG_DIRTY				\"$(shell git describe)\"" >> $@
-	@echo "#define GIT_TAG_DIRTY_NUMBER		\"$(shell git rev-list  `git rev-list --tags --no-walk --max-count=1`..HEAD --count)\"" >> $@
 	@echo "//----------------------------------------------------------------------" >> $@
 	@echo "" >> $@
 	@echo "// Git Zaehler definieren" >> $@
 	@echo "//----------------------------------------------------------------------" >> $@
+	@echo "#define GIT_TAG_DIRTY_COUNT			\"$(shell git rev-list  `git rev-list --tags --no-walk --max-count=1`..HEAD --count)\"" >> $@
 	@echo "#define GIT_OVERALL_COMMIT_COUNT	\"$(shell git rev-list --all --count)\"" >> $@
 	@echo "#define GIT_BRANCH_COMMIT_COUNT		\"$(shell git rev-list --branches --count)\"" >> $@
-	@echo "#define GIT_BRANCHES_COUNT			\"$(shell git branch | wc -l)\"" >> $@
+	@echo "#define GIT_ACTIVE_BRANCHES			\"$(shell git branch | wc -l)\"" >> $@
 	@echo "#define GIT_TAG_COUNT				\"$(shell git rev-list --tags --count)\"" >> $@
 	@echo "//----------------------------------------------------------------------" >> $@
 	@echo "" >> $@
@@ -45,5 +45,5 @@
 	@echo "#define BUILD_DATE					\"$(shell date +"%Y-%m-%d")\"" >> $@
 	@echo "#define BUILD_TIME					\"$(shell date +"%H:%M:%S")\"" >> $@
 	@echo "//----------------------------------------------------------------------" >> $@
-	@echo "#endif /* GIT_H */" >> $@
+	@echo "#endif /* _GIT_H_ */" >> $@
 	@echo "//----------------------------------------------------------------------" >> $@
