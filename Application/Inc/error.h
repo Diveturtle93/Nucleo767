@@ -22,6 +22,7 @@
 // Funktionen definieren
 //----------------------------------------------------------------------
 void hal_error(uint8_t status);
+void ITM_SendString(char *ptr);
 //----------------------------------------------------------------------
 
 #endif /* INC_ERROR_H_ */

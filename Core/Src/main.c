@@ -28,7 +28,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <math.h>
 #include "BasicUart.h"
 #include "SystemInfo.h"
 #include "Error.h"
@@ -38,19 +37,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-// Debug Nachricht ueber SWO senden
-// Nachricht SWO ITM Data Console
-// http://stefanfrings.de/stm32/cube_ide.html
-// Core Clock := Maximalfrequenz
-// Im String #GRN# oder #RED# oder #ORG# erscheint die Nachricht in einer Farbe
-void ITM_SendString(char *ptr)
-{
-	while(*ptr)
-	{
-		ITM_SendChar(*ptr);
-		ptr++;
-	}
-}
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -221,6 +208,7 @@ int main(void)
 	uartTransmit("\n", 1);
 
 	uartTransmit("Send Message\n", 13);
+	ITM_SendString(TEST_STRING_UART);
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -260,7 +248,6 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
   /** Configure the main internal regulator output voltage
   */
@@ -298,13 +285,6 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_USART3;
-  PeriphClkInitStruct.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
-  PeriphClkInitStruct.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();
   }
@@ -378,4 +358,3 @@ void assert_failed(uint8_t *file, uint32_t line)
 }
 #endif /* USE_FULL_ASSERT */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
