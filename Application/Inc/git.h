@@ -16,31 +16,31 @@
 
 // Git Commit-Infos definieren
 //----------------------------------------------------------------------
-#define GIT_COMMIT					"45c3dc4"
+#define GIT_COMMIT					"acce245"
 #define GIT_BRANCH					"master"
-#define GIT_HASH					"45c3dc4e6cb6f37051d447d72a475d80558aeb19"
+#define GIT_HASH					"acce24508ba129d2649794859751ec28f0c3379d"
 //----------------------------------------------------------------------
 
 // Git Tags-Infos definieren
 //----------------------------------------------------------------------
 #define GIT_LAST_TAG				"Init"
 #define GIT_TAG_COMMIT				"944ae72"
-#define GIT_TAG_DIRTY				"Init-14-g45c3dc4"
+#define GIT_TAG_DIRTY				"Init-15-gacce245"
 //----------------------------------------------------------------------
 
 // Git Zaehler definieren
 //----------------------------------------------------------------------
-#define GIT_TAG_DIRTY_COUNT			"14"
-#define GIT_OVERALL_COMMIT_COUNT	"19"
-#define GIT_BRANCH_COMMIT_COUNT		"15"
+#define GIT_TAG_DIRTY_COUNT			"15"
+#define GIT_OVERALL_COMMIT_COUNT	"20"
+#define GIT_BRANCH_COMMIT_COUNT		"16"
 #define GIT_ACTIVE_BRANCHES			"2"
 #define GIT_TAG_COUNT				"1"
 //----------------------------------------------------------------------
 
 // Build Zeit definieren
 //----------------------------------------------------------------------
-#define BUILD_DATE					"2022-01-16"
-#define BUILD_TIME					"09:29:40"
+#define BUILD_DATE					"2022-08-25"
+#define BUILD_TIME					"10:08:32"
 //----------------------------------------------------------------------
 #endif /* _GIT_H_ */
 //----------------------------------------------------------------------
