@@ -63,7 +63,7 @@
 /* USER CODE BEGIN PV */
 static volatile uint16_t rising = 0;
 static volatile uint16_t falling = 0;
-CAN_RxHeaderTypeDef rxHeader;
+//CAN_RxHeaderTypeDef rxHeader;
 uint8_t rxData[8];
 int32_t temperature;
 float sensorValue;
@@ -197,9 +197,9 @@ int main(void)
 	sFilterConfig.FilterBank = 0;
 	sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
 	sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-	sFilterConfig.FilterIdHigh = 0x0420 << 5;
+	sFilterConfig.FilterIdHigh = 0x0000 << 5;
 	sFilterConfig.FilterIdLow = 0x0;
-	sFilterConfig.FilterMaskIdHigh = 0x0420 << 5;
+	sFilterConfig.FilterMaskIdHigh = 0x0000 << 5;
 	sFilterConfig.FilterMaskIdLow = 0x0;
 	sFilterConfig.FilterFIFOAssignment = 0;
 	sFilterConfig.FilterActivation = ENABLE;
@@ -209,6 +209,13 @@ int main(void)
 	{
 		// Fehler beim konfigurieren der Filterbank fuer den CAN-Bus
 		hal_error(HAL_STATUS);
+		Error_Handler();
+	}
+
+	// Aktiviere Interrupts fuer CAN Bus
+	if((HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING)) != HAL_OK)
+	{
+		// Fehler in der Initialisierung des CAN Interrupts
 		Error_Handler();
 	}
 
@@ -325,8 +332,7 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-	HAL_CAN_GetRxMessage(hcan, (uint32_t)CAN_RX_FIFO0 , &rxHeader, rxData);
-	uartTransmit("rx 0\n", 5);
+	CAN_rx_read(hcan, CAN_RX_FIFO0);
 }
 /* USER CODE END 4 */
 

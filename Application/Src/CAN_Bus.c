@@ -24,10 +24,28 @@
 #include "millis.h"
 //----------------------------------------------------------------------
 
-Output_Paket CAN_Output_Paket_Liste[ANZAHL_OUTPUT_PAKETE];
+CAN_Paket CAN_Output_Paket_Liste[ANZAHL_OUTPUT_PAKETE];
 uint8_t CAN_Output_Signal_Liste[ANZAHL_OUTPUT_PAKETE * 8];
+uint8_t CAN_Input_Signal_Liste[CAN_BUFFER_SIZE*8];
 
-void CAN_write(CAN_HandleTypeDef* hcan)
+ring_buffer rxHeader;
+
+void CAN_rx_read (CAN_HandleTypeDef* hcan, uint32_t RxFifo)
+{
+	if (CAN_rx_available() < CAN_BUFFER_SIZE)
+	{
+		CAN_RxHeaderTypeDef _tmp_Rx;
+		HAL_CAN_GetRxMessage(hcan, RxFifo, &_tmp_Rx, &CAN_Input_Signal_Liste[rxHeader.head*8]);
+		rxHeader.Paket[rxHeader.head] = _tmp_Rx;
+		rxHeader.head = (rxHeader.head == (CAN_BUFFER_SIZE - 1)) ? 0 : (rxHeader.head + 1);
+	}
+	else
+	{
+
+	}
+}
+
+void CAN_write (CAN_HandleTypeDef* hcan)
 {
 	for (uint16_t i = 0; i < ANZAHL_OUTPUT_PAKETE; i++)
 	{
@@ -56,9 +74,17 @@ void CAN_write(CAN_HandleTypeDef* hcan)
 	}
 }
 
-Output_Paket CAN_Nachricht(uint16_t id, uint8_t length, uint16_t sendeintervall, uint32_t sende_init_time)
+CAN_Paket CAN_Nachricht (uint16_t id, uint8_t length, uint16_t sendeintervall, uint32_t sende_init_time)
 {
-	Output_Paket TxHeader = {id, length, sendeintervall - 1, sende_init_time};
+	CAN_Paket TxHeader = {id, length, sendeintervall - 1, sende_init_time};
 
 	return TxHeader;
+}
+
+uint8_t CAN_rx_available (void)
+{
+	if (rxHeader.head >= rxHeader.tail)
+		return rxHeader.head - rxHeader.tail;
+	else
+		return CAN_BUFFER_SIZE - (rxHeader.tail - rxHeader.head);
 }
