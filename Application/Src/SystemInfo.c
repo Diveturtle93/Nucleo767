@@ -21,6 +21,8 @@
 #include "git.h"
 #include "SystemInfo.h"
 #include "BasicUart.h"
+#include "git.h"
+#include "error.h"
 //----------------------------------------------------------------------
 
 // Einfuegen der STM Include-Dateien

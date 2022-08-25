@@ -28,29 +28,17 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <math.h>
 #include "BasicUart.h"
 #include "SystemInfo.h"
 #include "Error.h"
 #include "..\..\Application\Src\my_math.c"
+#include "CAN_Bus.h"
 
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-// Debug Nachricht ueber SWO senden
-// Nachricht SWO ITM Data Console
-// http://stefanfrings.de/stm32/cube_ide.html
-// Core Clock := Maximalfrequenz
-// Im String #GRN# oder #RED# oder #ORG# erscheint die Nachricht in einer Farbe
-void ITM_SendString(char *ptr)
-{
-	while(*ptr)
-	{
-		ITM_SendChar(*ptr);
-		ptr++;
-	}
-}
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -75,7 +63,7 @@ void ITM_SendString(char *ptr)
 /* USER CODE BEGIN PV */
 static volatile uint16_t rising = 0;
 static volatile uint16_t falling = 0;
-CAN_RxHeaderTypeDef rxHeader;
+//CAN_RxHeaderTypeDef rxHeader;
 uint8_t rxData[8];
 int32_t temperature;
 float sensorValue;
@@ -102,6 +90,8 @@ void MX_FREERTOS_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+	// Definiere Variable
+	CAN_FilterTypeDef sFilterConfig;
 	uint16_t dutyCycle, timerPeriod, frequency;
 	uint8_t HAL_STATUS = 0;
   /* USER CODE END 1 */
@@ -135,18 +125,26 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	printResetSource(readResetSource());
 
-	timerPeriod = (HAL_RCC_GetPCLK2Freq() / htim1.Init.Prescaler);
+//	timerPeriod = (HAL_RCC_GetPCLK2Freq() / htim1.Init.Prescaler);
 
-	if (HAL_TIM_Base_Start_IT(&htim1) != HAL_OK);
-	if (HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1) != HAL_OK);
-	if (HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_2) != HAL_OK);
+//	if (HAL_TIM_Base_Start_IT(&htim1) != HAL_OK);
+//	if (HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1) != HAL_OK);
+//	if (HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_2) != HAL_OK);
+	CAN_TxHeaderTypeDef TxHeader;
 
+	TxHeader.StdId = 0x321;
+	TxHeader.ExtId = 0x01;
+	TxHeader.RTR = CAN_RTR_DATA;
+	TxHeader.IDE = CAN_ID_STD;
+	TxHeader.DLC = 8;
+	TxHeader.TransmitGlobalTime=DISABLE;
+	uint8_t txData[8] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
 	/*
 	* Testing UART, polling
 	*/
 	#define TEST_STRING_UART  "\nUART3 Transmitting in polling mode, Hello Diveturtle93!\n"
 	uartTransmit(TEST_STRING_UART, sizeof(TEST_STRING_UART));
-	ITM_SendString(TEST_STRING_UART);
+//	ITM_SendString(TEST_STRING_UART);
 
 	collectSystemInfo();
 
@@ -194,14 +192,35 @@ int main(void)
 		Error_Handler();
 	}
 
-	if((HAL_STATUS = HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY)) != HAL_OK)
+	// Filter Bank initialisieren um Daten zu empfangen
+	// Akzeptiere alle CAN-Pakete
+	sFilterConfig.FilterBank = 0;
+	sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+	sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+	sFilterConfig.FilterIdHigh = 0x0000 << 5;
+	sFilterConfig.FilterIdLow = 0x0;
+	sFilterConfig.FilterMaskIdHigh = 0x0000 << 5;
+	sFilterConfig.FilterMaskIdLow = 0x0;
+	sFilterConfig.FilterFIFOAssignment = 0;
+	sFilterConfig.FilterActivation = ENABLE;
+
+	// Filter Bank schreiben
+	if((HAL_STATUS = HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig)) != HAL_OK)
 	{
-		/* Notification Error */
+		// Fehler beim konfigurieren der Filterbank fuer den CAN-Bus
 		hal_error(HAL_STATUS);
 		Error_Handler();
 	}
 
-	uartTransmit("Temperatur messen\n", 18);
+	// Aktiviere Interrupts fuer CAN Bus
+	if((HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING)) != HAL_OK)
+	{
+		// Fehler in der Initialisierung des CAN Interrupts
+		Error_Handler();
+	}
+
+	HAL_CAN_AddTxMessage(&hcan1, &TxHeader, txData, (uint32_t *)CAN_TX_MAILBOX0);
+	/*uartTransmit("Temperatur messen\n", 18);
 	uartTransmitNumber(*TEMP30_CAL_VALUE, 10);
 	uartTransmit("\n", 1);
 	uartTransmitNumber(*TEMP110_CAL_VALUE, 10);
@@ -221,20 +240,24 @@ int main(void)
 	uartTransmit("\n", 1);
 
 	uartTransmit("Send Message\n", 13);
+	ITM_SendString(TEST_STRING_UART);*/
   /* USER CODE END 2 */
 
   /* Init scheduler */
-  osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
-  MX_FREERTOS_Init();
+//  osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
+//  MX_FREERTOS_Init();
+
   /* Start scheduler */
-  osKernelStart();
+//  osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	CAN_config();
   while (1)
   {
-	  if (rising != 0 && falling != 0) {
+	  CAN_write(&hcan1);
+	  /*if (rising != 0 && falling != 0) {
 		  int diff = getDifference(rising, falling);
 		  dutyCycle = round((float)(diff * 100) / (float)rising);               // (width / period ) * 100
 		  frequency = timerPeriod / rising;               // timer restarts after rising edge so time between two rising edge is whatever is measured
@@ -244,7 +267,7 @@ int main(void)
 	  }
 
 	  uartTransmitNumber(dutyCycle, 10);
-	  uartTransmitNumber(frequency, 10);
+	  uartTransmitNumber(frequency, 10);*/
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -260,12 +283,12 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
   /** Configure the main internal regulator output voltage
   */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
@@ -282,12 +305,14 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+
   /** Activate the Over-Drive mode
   */
   if (HAL_PWREx_EnableOverDrive() != HAL_OK)
   {
     Error_Handler();
   }
+
   /** Initializes the CPU, AHB and APB buses clocks
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
@@ -301,21 +326,13 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_USART3;
-  PeriphClkInitStruct.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
-  PeriphClkInitStruct.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
-  {
-    Error_Handler();
-  }
   HAL_RCC_MCOConfig(RCC_MCO2, RCC_MCO2SOURCE_SYSCLK, RCC_MCODIV_3);
 }
 
 /* USER CODE BEGIN 4 */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-	HAL_CAN_GetRxMessage(hcan, (uint32_t)CAN_RX_FIFO0 , &rxHeader, rxData);
-	uartTransmit("rx 0\n", 5);
+	CAN_rx_read(hcan, CAN_RX_FIFO0);
 }
 /* USER CODE END 4 */
 
@@ -377,5 +394,3 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

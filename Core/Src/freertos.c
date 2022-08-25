@@ -205,4 +205,3 @@ void StartCan3Task(void *argument)
      
 /* USER CODE END Application */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

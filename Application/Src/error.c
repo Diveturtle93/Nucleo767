@@ -39,3 +39,17 @@ void hal_error(uint8_t status)
 #endif
 }
 //----------------------------------------------------------------------
+
+// Debug Nachricht ueber SWO senden
+// Nachricht SWO ITM Data Console
+// http://stefanfrings.de/stm32/cube_ide.html
+// Core Clock := Maximalfrequenz
+// Im String #GRN# oder #RED# oder #ORG# erscheint die Nachricht in einer Farbe
+void ITM_SendString(char *ptr)
+{
+	while(*ptr)
+	{
+		ITM_SendChar(*ptr);
+		ptr++;
+	}
+}
