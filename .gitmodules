@@ -1,3 +1,6 @@
 [submodule "Application/STM32_Systeminfo"]
 	path = Application/STM32_Systeminfo
 	url = https://github.com/Diveturtle93/STM32_Systeminfo.git
+[submodule "Application/EAuto_CAN"]
+	path = Application/EAuto_CAN
+	url = https://github.com/Diveturtle93/EAuto_CAN.git
