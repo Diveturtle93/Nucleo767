@@ -220,7 +220,7 @@ int main(void)
 	}
 
 	HAL_CAN_AddTxMessage(&hcan1, &TxHeader, txData, (uint32_t *)CAN_TX_MAILBOX0);
-	/*uartTransmit("Temperatur messen\n", 18);
+	uartTransmit("Temperatur messen\n", 18);
 	uartTransmitNumber(*TEMP30_CAL_VALUE, 10);
 	uartTransmit("\n", 1);
 	uartTransmitNumber(*TEMP110_CAL_VALUE, 10);
@@ -240,7 +240,7 @@ int main(void)
 	uartTransmit("\n", 1);
 
 	uartTransmit("Send Message\n", 13);
-	ITM_SendString(TEST_STRING_UART);*/
+	ITM_SendString(TEST_STRING_UART);
   /* USER CODE END 2 */
 
   /* Init scheduler */

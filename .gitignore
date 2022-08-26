@@ -4,4 +4,4 @@ Release/*
 /Release/
 .settings/*
 /.settings/
-git.h
+Application/Inc/git.h
